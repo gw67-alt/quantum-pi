@@ -58,6 +58,7 @@ game_state = {
     "credits": STARTING_CREDITS,
     "wins": 0,
     "losses": 0,
+    "coasting": 0,
     "ready": 0
 }
 
@@ -375,7 +376,7 @@ class MainWindow(QMainWindow):
         self.setWindowTitle("Triple Camera Homography Tracker with Guessing Game (No Charts)") # *** UPDATED TITLE ***
         # *** UPDATED GEOMETRY for three cameras (640*3 width + padding) ***
         self.setGeometry(100, 100, 1980, 500)
-        self.rand_deterministic = np.random.binomial(n=200, p=0.5, size=20000)
+        self.rand_deterministic = np.random.binomial(n=200, p=0.45, size=20000)
         # Create camera trackers
         self.camera_trackers = {
             CAMERA_0_ID: CameraTracker(CAMERA_0_ID),
@@ -568,7 +569,7 @@ class MainWindow(QMainWindow):
             
             if any_not_below: # All cameras are below threshold
                 game_state["credits"] -= COST_PER_GUESS
-                
+                game_state["coasting"] += 1
             # *** UPDATED win/loss logic for three cameras ***
             if all_below: # All cameras are below threshold
                 game_state["ready"] = game_state.get("ready", 0) + 1 # Not a "ready" state for SHA if alignment fails
@@ -598,7 +599,7 @@ class MainWindow(QMainWindow):
                 threshold_strs = [f"Cam{cid}={self.camera_trackers[cid].current_threshold:.2f}" for cid in ALL_CAMERA_IDS]
                 print(f"Guess Cycle: {camera_status_str} | x.txt val: {current_data_file_value_str} (0x{hex_value_from_file:X}), "
                       f"SHA Base Nonce: {self.init_count}, Checked up to: {self.init_count + iterations_for_sha -1}, "
-                      f"Credits: {game_state['credits']}, Success: {game_state['wins']}, Ready/ready: {game_state['ready']}, Losses: {game_state['losses']}, "
+                      f"Credits: {game_state['credits']}, Success: {game_state['wins']}, Ready/ready: {game_state['ready']}, Losses: {game_state['losses']}, Coasting: {game_state['coasting']}, "
                       f"Thresholds: {', '.join(threshold_strs)}")
                 
             else: # At least one camera is not below threshold
