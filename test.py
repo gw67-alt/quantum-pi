@@ -376,7 +376,7 @@ class MainWindow(QMainWindow):
         self.setWindowTitle("Triple Camera Homography Tracker with Guessing Game (No Charts)") # *** UPDATED TITLE ***
         # *** UPDATED GEOMETRY for three cameras (640*3 width + padding) ***
         self.setGeometry(100, 100, 1980, 500)
-        self.rand_deterministic = np.random.binomial(n=200, p=0.45, size=20000)
+        self.rand_deterministic = np.random.binomial(n=200, p=0.5, size=20000)
         # Create camera trackers
         self.camera_trackers = {
             CAMERA_0_ID: CameraTracker(CAMERA_0_ID),
@@ -539,6 +539,8 @@ class MainWindow(QMainWindow):
             cid: self.camera_trackers[cid].is_below_threshold for cid in ALL_CAMERA_IDS
         }
         all_below = all(cameras_below_threshold.values())
+        special = [val for val in cameras_below_threshold.values()] == True,False,False
+
         any_not_below = any(not status for status in cameras_below_threshold.values())
         print(cameras_below_threshold.values())
 
@@ -572,6 +574,43 @@ class MainWindow(QMainWindow):
                 game_state["coasting"] += 1
             # *** UPDATED win/loss logic for three cameras ***
             if all_below: # All cameras are below threshold
+
+                match_found_sha = False
+                winning_nonce = -1
+
+                print("VALID",current_nonce)
+                if current_nonce >= 100 and current_nonce <= 200: #or any function containing a nonce
+                    match_found_sha = True
+                    winning_nonce = current_nonce
+                    print(f"Success @ Nonce: {winning_nonce}, Base: {self.init_count})")
+
+                if match_found_sha:
+                    game_state["credits"] += WIN_CREDITS
+                    self.show_status_message(
+                        f"SHA Win! All Cams Below ({camera_status_str}) | Nonce: {winning_nonce}. +{WIN_CREDITS} credits!", 2000)
+                else:
+
+                    game_state["credits"] -= WIN_CREDITS
+                    self.show_status_message(
+                        f"Lost (SHA Fail)! All Cams Below ({camera_status_str}). -{COST_PER_GUESS} credits.", 2000)
+
+                # Log debug info (expanded for 3 cameras)
+                threshold_strs = [f"Cam{cid}={self.camera_trackers[cid].current_threshold:.2f}" for cid in ALL_CAMERA_IDS]
+                print(f"Guess Cycle: {camera_status_str} | x.txt val: {current_data_file_value_str} (0x{hex_value_from_file:X}), "
+                      f"SHA Base Nonce: {self.init_count}, Checked up to: {self.init_count + iterations_for_sha -1}, "
+                      f"Credits: {game_state['credits']}, Success: {game_state['wins']}, Ready/ready: {game_state['ready']}, Losses: {game_state['losses']}, Coasting: {game_state['coasting']}, "
+                      f"Thresholds: {', '.join(threshold_strs)}")
+                
+            else: # At least one camera is not below threshold
+                self.show_status_message(
+                    f"Lost (Alignment Fail - Not all cams below)! {camera_status_str}. -{COST_PER_GUESS} credits.", 2000)
+                # Log debug info for alignment fail
+                threshold_strs = [f"Cam{cid}={self.camera_trackers[cid].current_threshold:.2f}" for cid in ALL_CAMERA_IDS]
+                #print(f"Guess Cycle (Alignment Fail): {camera_status_str} | x.txt val: {current_data_file_value_str} (0x{hex_value_from_file:X}), "
+                      #f"SHA Base Nonce: {self.init_count}, "
+                      #f"Credits: {game_state['credits']}, Success: {game_state['wins']}, Ready/ready: {game_state['ready']}, "
+                      #f"Thresholds: {', '.join(threshold_strs)}")
+            if special: # All cameras are below threshold
                 game_state["ready"] = game_state.get("ready", 0) + 1 # Not a "ready" state for SHA if alignment fails
 
                 match_found_sha = False
@@ -611,7 +650,6 @@ class MainWindow(QMainWindow):
                       #f"SHA Base Nonce: {self.init_count}, "
                       #f"Credits: {game_state['credits']}, Success: {game_state['wins']}, Ready/ready: {game_state['ready']}, "
                       #f"Thresholds: {', '.join(threshold_strs)}")
-
 
         except (ValueError, IndexError) as e:
             print(f"Error processing data at index {self.data_index} or during guess: {e}")
