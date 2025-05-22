@@ -575,7 +575,7 @@ class MainWindow(QMainWindow):
                 winning_nonce = -1
 
                 current_nonce = self.init_count
-                if current_nonce >= 200: #or any function containing a nonce
+                if current_nonce >= 200 and current_nonce <= 300: #or any function containing a nonce
                     match_found_sha = True
                     winning_nonce = current_nonce
                     print(f"Success @ Nonce: {winning_nonce}, Base: {self.init_count})")
