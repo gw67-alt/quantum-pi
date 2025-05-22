@@ -56,6 +56,7 @@ WIN_CREDITS = 1
 game_state = {
     "credits": STARTING_CREDITS,
     "wins": 0,
+    "losses": 0,
     "ready": 0
 }
 
@@ -547,7 +548,7 @@ class MainWindow(QMainWindow):
             self.show_status_message("Error: No data available for x.txt!", 3000)
             return
 
-        iterations_for_sha = 5
+        iterations_for_sha = 1
         try:
             self.init_count = (self.init_count + iterations_for_sha) % 1000
             if self.init_count + iterations_for_sha >= 999:
@@ -574,7 +575,7 @@ class MainWindow(QMainWindow):
                 winning_nonce = -1
 
                 current_nonce = self.init_count
-                if current_nonce >= 200 and current_nonce <= 300: #or any function containing a nonce
+                if current_nonce >= 200: #or any function containing a nonce
                     match_found_sha = True
                     winning_nonce = current_nonce
                     print(f"Success @ Nonce: {winning_nonce}, Base: {self.init_count})")
@@ -585,6 +586,8 @@ class MainWindow(QMainWindow):
                     self.show_status_message(
                         f"SHA Win! All Cams Below ({camera_status_str}) | Nonce: {winning_nonce}. +{WIN_CREDITS} credits!", 2000)
                 else:
+                    game_state["losses"] = game_state.get("losses", 0) + 1
+
                     game_state["credits"] -= COST_PER_GUESS
                     self.show_status_message(
                         f"Lost (SHA Fail)! All Cams Below ({camera_status_str}). -{COST_PER_GUESS} credits.", 2000)
@@ -593,7 +596,7 @@ class MainWindow(QMainWindow):
                 threshold_strs = [f"Cam{cid}={self.camera_trackers[cid].current_threshold:.2f}" for cid in ALL_CAMERA_IDS]
                 print(f"Guess Cycle: {camera_status_str} | x.txt val: {current_data_file_value_str} (0x{hex_value_from_file:X}), "
                       f"SHA Base Nonce: {self.init_count}, Checked up to: {self.init_count + iterations_for_sha -1}, "
-                      f"Credits: {game_state['credits']}, Success: {game_state['wins']}, Ready/ready: {game_state['ready']}, "
+                      f"Credits: {game_state['credits']}, Success: {game_state['wins']}, Ready/ready: {game_state['ready']}, Losses: {game_state['losses']}, "
                       f"Thresholds: {', '.join(threshold_strs)}")
                 
             else: # At least one camera is not below threshold
