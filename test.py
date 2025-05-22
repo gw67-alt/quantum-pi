@@ -376,7 +376,7 @@ class MainWindow(QMainWindow):
         self.setWindowTitle("Triple Camera Homography Tracker with Guessing Game (No Charts)") # *** UPDATED TITLE ***
         # *** UPDATED GEOMETRY for three cameras (640*3 width + padding) ***
         self.setGeometry(100, 100, 1980, 500)
-        self.rand_deterministic = np.random.binomial(n=200, p=0.5, size=20000)
+        self.rand_deterministic = np.random.binomial(n=200, p=0.45, size=20000)
         # Create camera trackers
         self.camera_trackers = {
             CAMERA_0_ID: CameraTracker(CAMERA_0_ID),
@@ -550,7 +550,7 @@ class MainWindow(QMainWindow):
             self.show_status_message("Error: No data available for x.txt!", 3000)
             return
         current_nonce = self.rand_deterministic[self.init_count]
-
+        print("INVALID",current_nonce)
         iterations_for_sha = 1
         try:
             self.init_count = (self.init_count + iterations_for_sha) % 201
@@ -577,7 +577,7 @@ class MainWindow(QMainWindow):
                 match_found_sha = False
                 winning_nonce = -1
 
-                print(current_nonce)
+                print("VALID",current_nonce)
                 if current_nonce >= 100 and current_nonce <= 200: #or any function containing a nonce
                     match_found_sha = True
                     winning_nonce = current_nonce
