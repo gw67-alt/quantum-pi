@@ -9,7 +9,7 @@ from PyQt5.QtGui import QImage, QPixmap, QFont
 from collections import deque
 import os
 import hashlib
-PREFIX = "00000000"
+PREFIX = "000"
 
 def calculate_sha256_with_library(data):
     """
@@ -547,7 +547,7 @@ class MainWindow(QMainWindow):
             self.show_status_message("Error: No data available for x.txt!", 3000)
             return
 
-        iterations_for_sha = 10000
+        iterations_for_sha = 1
         try:
             self.init_count = (self.init_count + iterations_for_sha) % 4294967294
             if self.init_count + iterations_for_sha >= 4294967290:
@@ -572,13 +572,12 @@ class MainWindow(QMainWindow):
 
                 match_found_sha = False
                 winning_nonce = -1
-                for i in range(iterations_for_sha):
-                    current_nonce = self.init_count + i
-                    if calculate_sha256_with_library("GeorgeW" + str(current_nonce)).startswith(PREFIX):
-                        match_found_sha = True
-                        winning_nonce = current_nonce
-                        print(f"SHA Success @ Nonce: {winning_nonce} (Iter: {i+1} in this cycle, Base: {self.init_count})")
-                        break
+
+                current_nonce = self.init_count
+                if current_nonce >= 255 and current_nonce <= 265: #or any function containing a nonce
+                    match_found_sha = True
+                    winning_nonce = current_nonce
+                    print(f"Success @ Nonce: {winning_nonce}, Base: {self.init_count})")
 
                 if match_found_sha:
                     game_state["credits"] += WIN_CREDITS
