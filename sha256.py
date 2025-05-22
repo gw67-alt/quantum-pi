@@ -330,7 +330,7 @@ class CameraTracker:
 
         # Update dynamic threshold based on recent match history
         if len(self.threshold_history) > 5:  # Need at least a few data points
-            self.current_threshold = np.mean(self.threshold_history)-3
+            self.current_threshold = np.mean(self.threshold_history)
 
         # Update is_below_threshold status
         self.is_below_threshold = actual_plot_count < self.current_threshold
