@@ -549,8 +549,8 @@ class MainWindow(QMainWindow):
 
         iterations_for_sha = 5
         try:
-            self.init_count = (self.init_count + iterations_for_sha) % 4294967294
-            if self.init_count + iterations_for_sha >= 4294967290:
+            self.init_count = (self.init_count + iterations_for_sha) % 1000
+            if self.init_count + iterations_for_sha >= 999:
                 self.init_count = 0
                 print("Nonce counter `init_count` reset to 0.")
 
