@@ -376,7 +376,7 @@ class MainWindow(QMainWindow):
         self.setWindowTitle("Triple Camera Homography Tracker with Guessing Game (No Charts)") # *** UPDATED TITLE ***
         # *** UPDATED GEOMETRY for three cameras (640*3 width + padding) ***
         self.setGeometry(100, 100, 1980, 500)
-        self.rand_deterministic = np.random.binomial(n=200, p=0.45, size=20000)
+        self.rand_deterministic = np.random.binomial(n=200, p=0.5, size=20000)
         # Create camera trackers
         self.camera_trackers = {
             CAMERA_0_ID: CameraTracker(CAMERA_0_ID),
@@ -603,7 +603,6 @@ class MainWindow(QMainWindow):
                       f"Thresholds: {', '.join(threshold_strs)}")
                 
             else: # At least one camera is not below threshold
-                game_state["credits"] -= COST_PER_GUESS
                 self.show_status_message(
                     f"Lost (Alignment Fail - Not all cams below)! {camera_status_str}. -{COST_PER_GUESS} credits.", 2000)
                 # Log debug info for alignment fail
