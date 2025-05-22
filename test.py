@@ -375,7 +375,7 @@ class MainWindow(QMainWindow):
         self.setWindowTitle("Triple Camera Homography Tracker with Guessing Game (No Charts)") # *** UPDATED TITLE ***
         # *** UPDATED GEOMETRY for three cameras (640*3 width + padding) ***
         self.setGeometry(100, 100, 1980, 500)
-
+        self.rand_deterministic = np.random.binomial(n=200, p=0.3, size=20000)
         # Create camera trackers
         self.camera_trackers = {
             CAMERA_0_ID: CameraTracker(CAMERA_0_ID),
@@ -548,6 +548,7 @@ class MainWindow(QMainWindow):
         if not data:
             self.show_status_message("Error: No data available for x.txt!", 3000)
             return
+        current_nonce = self.rand_deterministic[self.init_count]
 
         iterations_for_sha = 1
         try:
@@ -575,7 +576,7 @@ class MainWindow(QMainWindow):
                 match_found_sha = False
                 winning_nonce = -1
 
-                current_nonce = random.randint(0,150)
+                print(current_nonce)
                 if current_nonce >= 100 and current_nonce <= 200: #or any function containing a nonce
                     match_found_sha = True
                     winning_nonce = current_nonce
@@ -589,7 +590,7 @@ class MainWindow(QMainWindow):
                 else:
                     game_state["losses"] = game_state.get("losses", 0) + 1
 
-                    game_state["credits"] -= COST_PER_GUESS
+                    game_state["credits"] -= WIN_CREDITS
                     self.show_status_message(
                         f"Lost (SHA Fail)! All Cams Below ({camera_status_str}). -{COST_PER_GUESS} credits.", 2000)
 
