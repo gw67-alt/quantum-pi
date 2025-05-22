@@ -550,8 +550,8 @@ class MainWindow(QMainWindow):
 
         iterations_for_sha = 1
         try:
-            self.init_count = (self.init_count + iterations_for_sha) % 301
-            if self.init_count + iterations_for_sha >= 300:
+            self.init_count = (self.init_count + iterations_for_sha) % 201
+            if self.init_count + iterations_for_sha >= 200:
                 self.init_count = 0
                 print("Nonce counter `init_count` reset to 0.")
 
