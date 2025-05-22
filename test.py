@@ -303,7 +303,7 @@ class CameraTracker:
     def __init__(self, camera_id, initial_threshold=MATCH_THRESHOLD_FOR_GUESS):
         self.camera_id = camera_id
         self.current_threshold = initial_threshold
-        self.threshold_history = deque(maxlen=30)
+        self.threshold_history = deque(maxlen=10)
         self.raw_match_history = deque(maxlen=MAX_CHART_POINTS)
         self.avg_match_history = deque(maxlen=MAX_CHART_POINTS)
         self.time_points = deque(maxlen=MAX_CHART_POINTS)
@@ -547,7 +547,7 @@ class MainWindow(QMainWindow):
             self.show_status_message("Error: No data available for x.txt!", 3000)
             return
 
-        iterations_for_sha = 1
+        iterations_for_sha = 5
         try:
             self.init_count = (self.init_count + iterations_for_sha) % 4294967294
             if self.init_count + iterations_for_sha >= 4294967290:
@@ -574,7 +574,7 @@ class MainWindow(QMainWindow):
                 winning_nonce = -1
 
                 current_nonce = self.init_count
-                if current_nonce >= 255 and current_nonce <= 265: #or any function containing a nonce
+                if current_nonce >= 200 and current_nonce <= 300: #or any function containing a nonce
                     match_found_sha = True
                     winning_nonce = current_nonce
                     print(f"Success @ Nonce: {winning_nonce}, Base: {self.init_count})")
