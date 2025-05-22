@@ -10,7 +10,7 @@ from collections import deque
 import os
 import hashlib
 
-PREFIX = "0000"
+PREFIX = "0000000"
 
 def calculate_sha256_with_library(data):
     """
@@ -330,7 +330,7 @@ class CameraTracker:
 
         # Update dynamic threshold based on recent match history
         if len(self.threshold_history) > 5:  # Need at least a few data points
-            self.current_threshold = np.mean(self.threshold_history)
+            self.current_threshold = np.mean(self.threshold_history)-3
 
         # Update is_below_threshold status
         self.is_below_threshold = actual_plot_count < self.current_threshold
@@ -628,7 +628,6 @@ class MainWindow(QMainWindow):
             else:
                 # Condition for both cameras being below threshold was not met
                 game_state["credits"] -= COST_PER_GUESS
-                game_state["losses"] = game_state.get("losses", 0) + 1
                 self.show_status_message(
                     f"Lost (Alignment Fail)! {camera_status}. -{COST_PER_GUESS} credits.", 2000)
 
