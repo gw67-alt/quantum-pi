@@ -539,7 +539,7 @@ class MainWindow(QMainWindow):
             cid: self.camera_trackers[cid].is_below_threshold for cid in ALL_CAMERA_IDS
         }
         all_below = all(cameras_below_threshold.values())
-        special = [val for val in cameras_below_threshold.values()] == True,False,False
+        special = [val for val in cameras_below_threshold.values()] == True,False,False or [val for val in cameras_below_threshold.values()] == False,True,True
 
         any_not_below = any(not status for status in cameras_below_threshold.values())
         print(cameras_below_threshold.values())
