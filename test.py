@@ -9,6 +9,7 @@ from PyQt5.QtGui import QImage, QPixmap, QFont
 from collections import deque
 import os
 import hashlib
+import random
 PREFIX = "000"
 
 def calculate_sha256_with_library(data):
@@ -574,7 +575,7 @@ class MainWindow(QMainWindow):
                 match_found_sha = False
                 winning_nonce = -1
 
-                current_nonce = self.init_count
+                current_nonce = random.randint(0,150)
                 if current_nonce >= 100 and current_nonce <= 200: #or any function containing a nonce
                     match_found_sha = True
                     winning_nonce = current_nonce
