@@ -550,8 +550,8 @@ class MainWindow(QMainWindow):
 
         iterations_for_sha = 1
         try:
-            self.init_count = (self.init_count + iterations_for_sha) % 1000
-            if self.init_count + iterations_for_sha >= 999:
+            self.init_count = (self.init_count + iterations_for_sha) % 301
+            if self.init_count + iterations_for_sha >= 300:
                 self.init_count = 0
                 print("Nonce counter `init_count` reset to 0.")
 
@@ -575,7 +575,7 @@ class MainWindow(QMainWindow):
                 winning_nonce = -1
 
                 current_nonce = self.init_count
-                if current_nonce >= 200 and current_nonce <= 300: #or any function containing a nonce
+                if current_nonce >= 100 and current_nonce <= 200: #or any function containing a nonce
                     match_found_sha = True
                     winning_nonce = current_nonce
                     print(f"Success @ Nonce: {winning_nonce}, Base: {self.init_count})")
