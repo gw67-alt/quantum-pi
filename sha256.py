@@ -10,7 +10,7 @@ from collections import deque
 import os
 import hashlib
 
-PREFIX = "0000000"
+PREFIX = "000000"
 
 def calculate_sha256_with_library(data):
     """
@@ -564,6 +564,10 @@ class MainWindow(QMainWindow):
 
         iterations_for_sha = 100000 # Number of nonces to try in this guess cycle
         try:
+            self.init_count = (self.init_count + iterations_for_sha) % 4294967294 # Keep large range
+            if self.init_count + iterations_for_sha >= 4294967290: # Optional reset if it grows too large
+                self.init_count = 0
+                print("Nonce counter `init_count` reset to 0.")
             # The use of self.init_count for current_value and hex_value was confusing
             # The original x.txt data part seemed separate from the SHA part.
             # For now, using self.data_index for x.txt as in previous versions.
@@ -577,20 +581,14 @@ class MainWindow(QMainWindow):
             camera_status = f"Cam0: {'Below' if cam0_below else 'Above'}, " \
                             f"Cam1: {'Below' if cam1_below else 'Above'}"
             if not cam0_below:
-                # Win scenario
-                game_state["credits"] += COST_PER_GUESS
-               
-            else:
+             
                 # Any other scenario is a loss
                 game_state["credits"] -= COST_PER_GUESS
                 
                     
             # Win condition: Both cameras are below threshold AND value is 0x55
             if not cam1_below:
-                # Win scenario
-                game_state["credits"] += COST_PER_GUESS
                
-            else:
                 # Any other scenario is a loss
                 game_state["credits"] -= COST_PER_GUESS
                
@@ -621,7 +619,7 @@ class MainWindow(QMainWindow):
                   # Log debug info
                 print(f"Guess Cycle: {camera_status} | x.txt val: {current_data_file_value_str} (0x{hex_value_from_file:X}), "
                       f"SHA Base Nonce: {self.init_count}, Checked up to: {self.init_count + iterations_for_sha -1}, "
-                      f"Credits: {game_state['credits']}, Wins: {game_state['wins']}, Losses: {game_state['losses']}, "
+                      f"Credits: {game_state['credits']}, Success states: {game_state['wins']}, Ready states: {game_state['losses']}, "
                       f"Thresholds: Cam0={self.camera_trackers[CAMERA_0_ID].current_threshold:.2f}, "
                       f"Cam1={self.camera_trackers[CAMERA_1_ID].current_threshold:.2f}")
 
@@ -642,10 +640,7 @@ class MainWindow(QMainWindow):
             # Move to next data point from x.txt, wrap around if needed
             self.data_index = (self.data_index + 1) # % len(data) if data else 0 removed, handled by modulo above
             # Increment base nonce for next SHA search window
-            self.init_count = (self.init_count + iterations_for_sha) % 4294967294 # Keep large range
-            if self.init_count + iterations_for_sha >= 4294967290: # Optional reset if it grows too large
-                self.init_count = 0
-                print("Nonce counter `init_count` reset to 0.")
+
 
             # Update UI with new game state
             self.app_state.update_game_state(game_state)
