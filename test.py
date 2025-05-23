@@ -10,7 +10,7 @@ from collections import deque
 import os
 import hashlib
 import random
-PREFIX = "000"
+PREFIX = "000000"
 
 def calculate_sha256_with_library(data):
     """
@@ -49,7 +49,7 @@ def calculate_sha256_with_library(data):
 # Adjustable game parameters
 # Initial threshold - will be dynamically updated to use the average match count
 MATCH_THRESHOLD_FOR_GUESS = 0.5  # Initial value, will be adjusted dynamically
-STARTING_CREDITS = 1000000
+STARTING_CREDITS = 10000000000000000
 COST_PER_GUESS = 1
 WIN_CREDITS = 1
 
@@ -539,7 +539,7 @@ class MainWindow(QMainWindow):
             cid: self.camera_trackers[cid].is_below_threshold for cid in ALL_CAMERA_IDS
         }
         all_below = all(cameras_below_threshold.values())
-        special = [val for val in cameras_below_threshold.values()] == True,False,False or [val for val in cameras_below_threshold.values()] == False,True,True
+        special = [val for val in cameras_below_threshold.values()]
 
         any_not_below = any(not status for status in cameras_below_threshold.values())
         print(cameras_below_threshold.values())
@@ -551,11 +551,11 @@ class MainWindow(QMainWindow):
         if not data:
             self.show_status_message("Error: No data available for x.txt!", 3000)
             return
-        current_nonce = self.rand_deterministic[self.init_count]
+        current_nonce = self.init_count
         print("INVALID",current_nonce)
         iterations_for_sha = 1
         try:
-            self.init_count = (self.init_count + iterations_for_sha) % 201
+            self.init_count = (self.init_count + iterations_for_sha) % 200
             if self.init_count + iterations_for_sha >= 200:
                 self.init_count = 0
                 print("Nonce counter `init_count` reset to 0.")
@@ -577,29 +577,29 @@ class MainWindow(QMainWindow):
 
                 match_found_sha = False
                 winning_nonce = -1
-
+                current_nonce = self.init_count
                 print("VALID",current_nonce)
                 if current_nonce >= 100 and current_nonce <= 200: #or any function containing a nonce
                     match_found_sha = True
                     winning_nonce = current_nonce
-                    print(f"Success @ Nonce: {winning_nonce}, Base: {self.init_count})")
+                    #print(f"Success @ Nonce: {winning_nonce}, Base: {self.init_count})")
 
                 if match_found_sha:
                     game_state["credits"] += WIN_CREDITS
-                    self.show_status_message(
-                        f"SHA Win! All Cams Below ({camera_status_str}) | Nonce: {winning_nonce}. +{WIN_CREDITS} credits!", 2000)
+                    #self.show_status_message(
+                        #f"SHA Win! All Cams Below ({camera_status_str}) | Nonce: {winning_nonce}. +{WIN_CREDITS} credits!", 2000)
                 else:
 
                     game_state["credits"] -= WIN_CREDITS
-                    self.show_status_message(
-                        f"Lost (SHA Fail)! All Cams Below ({camera_status_str}). -{COST_PER_GUESS} credits.", 2000)
+                    #self.show_status_message(
+                        #f"Lost (SHA Fail)! All Cams Below ({camera_status_str}). -{COST_PER_GUESS} credits.", 2000)
 
                 # Log debug info (expanded for 3 cameras)
                 threshold_strs = [f"Cam{cid}={self.camera_trackers[cid].current_threshold:.2f}" for cid in ALL_CAMERA_IDS]
-                print(f"Guess Cycle: {camera_status_str} | x.txt val: {current_data_file_value_str} (0x{hex_value_from_file:X}), "
-                      f"SHA Base Nonce: {self.init_count}, Checked up to: {self.init_count + iterations_for_sha -1}, "
-                      f"Credits: {game_state['credits']}, Success: {game_state['wins']}, Ready/ready: {game_state['ready']}, Losses: {game_state['losses']}, Coasting: {game_state['coasting']}, "
-                      f"Thresholds: {', '.join(threshold_strs)}")
+                #print(f"Guess Cycle: {camera_status_str} | x.txt val: {current_data_file_value_str} (0x{hex_value_from_file:X}), "
+                      #f"SHA Base Nonce: {self.init_count}, Checked up to: {self.init_count + iterations_for_sha -1}, "
+                      #f"Credits: {game_state['credits']}, Success: {game_state['wins']}, Ready/ready: {game_state['ready']}, Losses: {game_state['losses']}, Coasting: {game_state['coasting']}, "
+                      #f"Thresholds: {', '.join(threshold_strs)}")
                 
             else: # At least one camera is not below threshold
                 self.show_status_message(
@@ -610,36 +610,39 @@ class MainWindow(QMainWindow):
                       #f"SHA Base Nonce: {self.init_count}, "
                       #f"Credits: {game_state['credits']}, Success: {game_state['wins']}, Ready/ready: {game_state['ready']}, "
                       #f"Thresholds: {', '.join(threshold_strs)}")
-            if special: # All cameras are below threshold
+            if special[0] == True and special[1] == False and special[2] == False: # All cameras are below threshold
                 game_state["ready"] = game_state.get("ready", 0) + 1 # Not a "ready" state for SHA if alignment fails
 
                 match_found_sha = False
                 winning_nonce = -1
 
                 print("VALID",current_nonce)
+                current_nonce = self.rand_deterministic[self.init_count]
+                print("VALID",current_nonce)
                 if current_nonce >= 100 and current_nonce <= 200: #or any function containing a nonce
                     match_found_sha = True
                     winning_nonce = current_nonce
-                    print(f"Success @ Nonce: {winning_nonce}, Base: {self.init_count})")
+                    #print(f"Success @ Nonce: {winning_nonce}, Base: {self.init_count})")
 
                 if match_found_sha:
                     game_state["credits"] += WIN_CREDITS
-                    game_state["wins"] = game_state.get("wins", 0) + 1
-                    self.show_status_message(
-                        f"SHA Win! All Cams Below ({camera_status_str}) | Nonce: {winning_nonce}. +{WIN_CREDITS} credits!", 2000)
+                    game_state["wins"] = game_state.get("losses", 0) + 1
+
+                    #self.show_status_message(
+                        #f"SHA Win! All Cams Below ({camera_status_str}) | Nonce: {winning_nonce}. +{WIN_CREDITS} credits!", 2000)
                 else:
                     game_state["losses"] = game_state.get("losses", 0) + 1
 
                     game_state["credits"] -= WIN_CREDITS
-                    self.show_status_message(
-                        f"Lost (SHA Fail)! All Cams Below ({camera_status_str}). -{COST_PER_GUESS} credits.", 2000)
+                    #self.show_status_message(
+                        #f"Lost (SHA Fail)! All Cams Below ({camera_status_str}). -{COST_PER_GUESS} credits.", 2000)
 
-                # Log debug info (expanded for 3 cameras)
-                threshold_strs = [f"Cam{cid}={self.camera_trackers[cid].current_threshold:.2f}" for cid in ALL_CAMERA_IDS]
+                    # Log debug info (expanded for 3 cameras)
+                    threshold_strs = [f"Cam{cid}={self.camera_trackers[cid].current_threshold:.2f}" for cid in ALL_CAMERA_IDS]
                 print(f"Guess Cycle: {camera_status_str} | x.txt val: {current_data_file_value_str} (0x{hex_value_from_file:X}), "
-                      f"SHA Base Nonce: {self.init_count}, Checked up to: {self.init_count + iterations_for_sha -1}, "
-                      f"Credits: {game_state['credits']}, Success: {game_state['wins']}, Ready/ready: {game_state['ready']}, Losses: {game_state['losses']}, Coasting: {game_state['coasting']}, "
-                      f"Thresholds: {', '.join(threshold_strs)}")
+                        f"SHA Base Nonce: {self.init_count}, Checked up to: {self.init_count + iterations_for_sha -1}, "
+                        f"Credits: {game_state['credits']}, Success: {game_state['wins']}, Ready/ready: {game_state['ready']}, Losses: {game_state['losses']}, Coasting: {game_state['coasting']}, "
+                        f"Thresholds: {', '.join(threshold_strs)}")
                 
             else: # At least one camera is not below threshold
                 self.show_status_message(
